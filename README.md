@@ -30,13 +30,13 @@ application section of the manuscript can be replicated with `data-analysis.R`.
 All results will either print in the R console or be
 stored in a new folder, **results**.
 
-| File | Description |
+| Coding File | Description |
 | --- | --- |
-| data-analysis.R | Replication code to reproduce the MBALT 2017A application results |
-| data-processing.R | Replication code to process **raw-data** for `data-analysis.R` |
-| lrt-formulas-LT-only.R | Functions used for QIDD testing in `data-analysis.R`, left-truncation only |
-| lrt-formulas-LT-RC.R | Functions used for QIDD testing in `data-analysis.R`, left-truncation + right-censoring|
-| mbalt-term-time-function.R | Function used to process the MBALT 2017A raw lease data into survival times |
+| `data-analysis.R` | Replication code to reproduce the MBALT 2017A application results |
+| `data-processing.R` | Replication code to process **raw-data** for `data-analysis.R` |
+| `lrt-formulas-LT-only.R` | Functions used for QIDD testing in `data-analysis.R`, left-truncation (LT) only |
+| `lrt-formulas-LT-RC.R` | Functions used for QIDD testing in `data-analysis.R`, LT + right-censoring|
+| `mbalt-term-time-function.R` | Function used to process the MBALT 2017A raw lease data into survival times |
 
 
 <!--
