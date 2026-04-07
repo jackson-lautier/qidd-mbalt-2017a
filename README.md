@@ -30,14 +30,14 @@ All results will either print in the R console or be
 stored in a new folder, **results**.
 
 
-## Lead, Corresponding Author
+%## Lead, Corresponding Author
 
-**Jackson P. Lautier**
+%**Jackson P. Lautier**
 
-- [Website](https://jacksonlautier.com/)
+%- [Website](https://jacksonlautier.com/)
 
-## Complete Authors
+%## Complete Authors
 
-**Sy Han Chiou**
+%**Sy Han Chiou**
 
-- [Website](https://www.sychiou.com/)
+%- [Website](https://www.sychiou.com/)
