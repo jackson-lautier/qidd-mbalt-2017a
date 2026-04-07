@@ -6,9 +6,10 @@
 
 This repository is intended as an online supplement to the working paper:
 
-Lautier, J. P., Chiou, S.H. (2026) "Testing quasi-independence for discrete data subject to left-truncation."
-(see [https://jacksonlautier.com/publications](https://jacksonlautier.com/publications)
-for current working papers)
+<!Lautier, J. P., Chiou, S.H. (2026)>
+"Testing quasi-independence for discrete data subject to left-truncation."
+<!(see [https://jacksonlautier.com/publications](https://jacksonlautier.com/publications)
+for current working papers)>
 
 Please attribute any citations of this repository to the original
 manuscript.
@@ -30,14 +31,15 @@ All results will either print in the R console or be
 stored in a new folder, **results**.
 
 
-%## Lead, Corresponding Author
+<!
+## Lead, Corresponding Author
 
-%**Jackson P. Lautier**
+**Jackson P. Lautier**
 
-%- [Website](https://jacksonlautier.com/)
+- [Website](https://jacksonlautier.com/)
 
-%## Complete Authors
+## Complete Authors
 
-%**Sy Han Chiou**
+**Sy Han Chiou**
 
-%- [Website](https://www.sychiou.com/)
+- [Website](https://www.sychiou.com/)>
