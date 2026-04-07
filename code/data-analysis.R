@@ -74,12 +74,12 @@ rownames(results) = lease.terms
 
 l = lease.terms[1]
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1,4)]
 colnames(obs_data) = c("Xi", "Yi")
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -236,12 +236,12 @@ results[as.character(l), "result"] = 1 * (lambda.n > qchisq(0.05, deg.free, lowe
 ################################################################################
 l = lease.terms[2]
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1,4)]
 colnames(obs_data) = c("Xi", "Yi")
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -399,12 +399,12 @@ results[as.character(l), "result"] = 1 * (lambda.n > qchisq(0.05, deg.free, lowe
 
 l = lease.terms[3]
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1,4)]
 colnames(obs_data) = c("Xi", "Yi")
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -564,12 +564,12 @@ results[as.character(l), "result"] = 1 * (lambda.n > qchisq(0.05, deg.free, lowe
 
 l = lease.terms[4]
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1)]
 colnames(obs_data) = c("Zi", "Yi", "Di")
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -812,12 +812,12 @@ results[as.character(l), "result"] = 1 * (lambda.tau.n > qchisq(0.05, deg.free, 
 ################################################################################
 l = lease.terms[5]
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1)]
 colnames(obs_data) = c("Zi", "Yi", "Di")
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -1063,12 +1063,12 @@ results[as.character(l), "result"] = 1 * (lambda.tau.n > qchisq(0.05, deg.free, 
 ################################################################################
 l = lease.terms[6]
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1)]
 colnames(obs_data) = c("Zi", "Yi", "Di")
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -1314,12 +1314,12 @@ results[as.character(l), "result"] = 1 * (lambda.tau.n > qchisq(0.05, deg.free, 
 ################################################################################
 l = lease.terms[7]
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1)]
 colnames(obs_data) = c("Zi", "Yi", "Di")
 
-f.name = paste('./data-clean/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
