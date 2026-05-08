@@ -7,7 +7,7 @@
 This repository is intended as an online supplement to the working paper:
 
 <!--Lautier, J. P., Chiou, S.H. (2026)-->
-"Testing quasi-independence for discrete data subject to left-truncation."
+"Testing quasi-independence for discrete, left-truncated data observed in asset-backed securities."
 <!--(see [https://jacksonlautier.com/publications](https://jacksonlautier.com/publications)
 for current working papers)-->
 
