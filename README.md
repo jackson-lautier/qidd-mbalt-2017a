@@ -18,7 +18,8 @@ This repository includes:
 
 - **raw-data** Scraped loan demographic and performance data from the ABS bond
 MBALT 2017-A.  Scraped 2024 Fetal Death Data Files (National Center for Health Statistics).
-<i> This is a note. </i>
+<i> Please contact the corresponding author (Lautier, J.P.) if interested in the Oxford
+Conception Study data. </i>
  
 
 - **data-clean** Cleaned raw MBALT 2017a and fetal death data into files used within the
@@ -39,6 +40,9 @@ stored in a new folder, **results**.
 | `lrt-formulas-LT-only.R` | Functions used for QIDD testing in `data-analysis.R`, left-truncation (LT) only |
 | `lrt-formulas-LT-RC.R` | Functions used for QIDD testing in `data-analysis.R`, LT + right-censoring|
 | `mbalt-term-time-function.R` | Function used to process the MBALT 2017A raw lease data into survival times |
+| `2024-date-ref.csv` | Date file to estimate date of death for `data-processing.R' |
+| `fet-death-cols.csv` | Columns references to clean fetal data data with `data-processing.R' |
+ 
 
 
 
