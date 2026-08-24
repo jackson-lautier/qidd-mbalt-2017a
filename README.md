@@ -6,10 +6,10 @@
 
 This repository is intended as an online supplement to the working paper:
 
-<!--Lautier, J. P., Chiou, S.H. (2026)-->
-"Testing quasi-independence for discrete, left-truncated data observed in asset-backed securities."
-<!--(see [https://jacksonlautier.com/publications](https://jacksonlautier.com/publications)
-for current working papers)-->
+Lautier, J. P., Chiou, S.H. (2026)
+"Testing quasi-independence for discrete, left-truncated data."
+(see [https://jacksonlautier.com/publications](https://jacksonlautier.com/publications)
+for current working papers)
 
 Please attribute any citations of this repository to the original
 manuscript.
@@ -17,9 +17,11 @@ manuscript.
 This repository includes:
 
 - **raw-data** Scraped loan demographic and performance data from the ABS bond
-MBALT 2017-A.
+MBALT 2017-A.  Scraped 2024 Fetal Death Data Files (National Center for Health Statistics).
+<i> This is a note. </i>
+ 
 
-- **data-clean** Cleaned raw MBALT 2017a data into files used within the
+- **data-clean** Cleaned raw MBALT 2017a and fetal death data into files used within the
 manuscript. These files are identical to the files created by `data-processing.R'
 in the **code** folder.
 
@@ -39,7 +41,7 @@ stored in a new folder, **results**.
 | `mbalt-term-time-function.R` | Function used to process the MBALT 2017A raw lease data into survival times |
 
 
-<!--
+
 ## Lead, Corresponding Author
 
 **Jackson P. Lautier**
@@ -50,4 +52,4 @@ stored in a new folder, **results**.
 
 **Sy Han Chiou**
 
-- [Website](https://www.sychiou.com/)-->
+- [Website](https://www.sychiou.com/)
