@@ -34,8 +34,11 @@
 #
 # supporting files:
 # ".\raw-data\MBALT17A_compiled2.csv"
+# ".\raw-data\2024_FET_Analysis_Public_US_20260112T094254.txt"
 #
 # "./code/mbalt-term-time-function.R"
+# "./code/fet-death-cols.csv
+# "./code/2024-date-ref.csv"
 #
 #The code must be run sequentially downwards.
 #As the new, cleaned files are prepared, they will be saved in a new
@@ -43,21 +46,94 @@
 #For data analysis, proceed directly to 'data_analysis.R'.
 #
 #
-######################################################################################
-######################################################################################
-######################################################################################
-######################################################################################
-require('lubridate')
-
-source("./code/mbalt-term-time-function.R")
-
-######################################################################################
-######################################################################################
-######################################################################################
-######################################################################################
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+# FETAL DEATHS
+################################################################################
+################################################################################
+################################################################################
+################################################################################
 
 #where processed data will be stored
 dir.create('./processed-data/')
+
+require('readr')
+require('lubridate')
+
+col.specs = read.csv("./code/fet-death-cols.csv")
+
+col_specs = fwf_positions(
+  start = col.specs$start,
+  end = col.specs$end,
+  col_names = col.specs$col.name
+)
+
+data <- read_fwf("./raw-data/2024_FET_Analysis_Public_US_20260112T094254.txt",
+                 col_specs)
+
+#write.csv(data, "./data/2024-fet-analysis-public.csv")
+#dat <- read.csv("./data/2024-fet-analysis-public.csv")
+
+dat = as.data.frame(data)
+
+#remove unknown gestation ages
+dat = dat[ !(dat$COMBGEST == 99), ]
+
+date.ref = read.csv("./code/2024-date-ref.csv")
+
+DOD = c()
+
+for(i in c(1:nrow(dat))){
+  
+  #step one: pull possible dates
+  poss.dates =
+    date.ref[ (as.numeric(dat$DOD_MM[i]) == date.ref$dt.mth) &
+                (as.numeric(dat$DOD_WK[i]) == date.ref$dt.wk) &
+                (as.numeric(dat$DOD_YY[i]) == date.ref$dt.year), ]
+  
+  #step two: select date at random from possible dates
+  set.seed(i)
+  rnd.date = sample(poss.dates$full.date, 1)
+  
+  #step three: append random date
+  DOD = append(rnd.date, DOD)
+  
+}
+
+dat$est.DOD = DOD #estimate date of death
+
+#impute weeks from report period start
+report.date = "01-01-2024"
+dat$est.wks.rep.date = interval(as.Date(report.date,"%m-%d-%Y"),
+                                as.Date(dat$est.DOD, "%m/%d/%Y")) %/% weeks(1)
+
+#get sample of LT lifetimes; if est.wks.rep.date < est.gest.age
+dat = dat[ (as.numeric(dat$COMBGEST) > dat$est.wks.rep.date ), ]
+
+#define LT random variable
+dat$Yi = as.numeric(dat$COMBGEST) - dat$est.wks.rep.date
+dat$Xi = as.numeric(dat$COMBGEST)
+
+write.csv(dat, "./processed-data/2024-fet-analysis-LT-lifetimes.csv")
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+# CONSUMER AUTO LEASE
+################################################################################
+################################################################################
+################################################################################
+################################################################################
+
+source("./code/mbalt-term-time-function.R")
+
+################################################################################
+################################################################################
+################################################################################
+################################################################################
 
 #mbalt 2017 summary statistics
 path = "./raw-data/"

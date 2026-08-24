@@ -30,6 +30,7 @@
 
 # supporting files:
 # ".\raw-data\MBALT17A_compiled2.csv"
+# ".\raw-data\2024_FET_Analysis_Public_US_20260112T094254.txt"
 #
 # "./code/lrt-formulas-LT-only.R"
 # "./code/lrt-formulas-LT-RC.R"
@@ -47,8 +48,349 @@ dir.create('./results/')
 rm(list=ls())
 
 ################################################################################
-#QIDD tests
+#Fetal deaths
 ################################################################################
+
+#summary statistics
+path = "./processed-data/"
+fet.dat <- read.csv(paste(path,'2024-fet-analysis-LT-lifetimes.csv',sep=""))
+
+nrow(fet.dat)
+
+
+################################################################################
+#LRT testing
+################################################################################
+
+results = matrix(NA, nrow = 2, ncol = 12)
+colnames(results) = c("42w+",
+                      "n",
+                      "Delta",
+                      "Xi",
+                      "m",
+                      "censor.rate",
+                      "An.0",
+                      "uLRT",
+                      "Lambda.n",
+                      "deg.free",
+                      "crit.value",
+                      "result")
+
+################################################################################
+#all observations
+################################################################################
+
+obs_data = fet.dat[,c("Xi", "Yi")]
+
+Delta = min(obs_data$Yi) - 1
+omega = max(obs_data$Xi)
+m = max(obs_data$Yi) - Delta
+
+minU = Delta + 1
+maxU = omega
+minV = Delta + 1
+maxV = Delta + m
+
+U.support = c(minU:maxU)
+V.support = c(minV:maxV)
+
+u = c( (Delta + 1) : omega)
+reps = length(c( (Delta + 1) : (Delta + m)))
+
+x_col = c()
+y_col = c()
+for(u in c( (Delta + 1) : omega)){
+  
+  for(v in c( (Delta + 1) : (Delta + m))){
+    if(v <= u){
+      x_col = append(x_col, u)
+      y_col = append(y_col, v)
+    }
+  }
+  
+}
+
+h_inv = data.frame("X" = x_col,
+                   "Y" = y_col)
+
+source('./code/lrt-formulas-LT-only.R')
+
+#null: h_* is true
+haz_est = sapply(c( (Delta + 1) : omega), lnx)
+if ( is.na(haz_est[length(U.support)]) ){ haz_est[length(U.support)] = 1 }
+rev_haz_est = sapply( c((Delta + 1):(Delta +m)), bnx)
+U_est.n = sapply(c( (Delta + 1) : omega), f_est)
+G_est.n = sapply(c((Delta + 1):(Delta + m)), g_est)
+l.0.n = log_like_fn_0(U_est.n, G_est.n)
+
+#f.est.n = U_est.n
+#g.est.n = G_est.n
+alpha.est.n = alpha(U_est.n, G_est.n)
+
+OMEGA_est = c()
+for(j in c((Delta + 1):(omega))){
+  for(k in c((Delta + 1):min(j, Delta + m))){
+    #print(c(j,k))
+    OMEGA_est = append(OMEGA_est,
+                       sum(( (obs_data$Yi == k ) & (obs_data$Xi == j) )) / nrow(obs_data))
+  }
+}
+l.1.n = log_like_fn(OMEGA_est)
+
+n = nrow(obs_data)
+n.0 = sum(OMEGA_est == 0)
+
+#create missing sample
+missing.dat = as.data.frame(h_inv[which(OMEGA_est == 0),c(1:2)])
+names(missing.dat) = c("Xi", "Yi")
+obs_data = rbind(obs_data, missing.dat)
+
+#check l.1
+OMEGA_est = c()
+for(j in c((Delta + 1):(omega))){
+  for(k in c((Delta + 1):min(j, Delta + m))){
+    #print(c(j,k))
+    OMEGA_est = append(OMEGA_est,
+                       sum(( (obs_data$Yi == k ) & (obs_data$Xi == j) )) / nrow(obs_data))
+  }
+}
+l.1.n.star = log_like_fn(OMEGA_est)
+
+l.1.n + n * log( n / (n + n.0) ) + n.0 * log(1 / (n.0 + n))
+l.1.n.star
+
+#check l.0
+haz_est = sapply(c( (Delta + 1) : omega), lnx)
+if ( is.na(haz_est[length(U.support)]) ){ haz_est[length(U.support)] = 1 }
+rev_haz_est = sapply( c((Delta + 1):(Delta +m)), bnx)
+U_est.n.star = sapply(c( (Delta + 1) : omega), f_est)
+G_est.n.star = sapply(c((Delta + 1):(Delta + m)), g_est)
+l.0.n.star = log_like_fn_0(U_est.n.star, G_est.n.star)
+
+#f.est.n.star = U_est
+#g.est.n.star = G_est
+alpha.est.n.star = alpha(U_est.n.star, G_est.n.star)
+
+#calculate K2
+s1 = -(n + n.0) * log( alpha.est.n.star / alpha.est.n ) -
+  (n.0) * log( alpha.est.n )
+
+new.dat = obs_data[c( (n+1) : (n + n.0) ),]
+old.dat = obs_data[c(1:n),]
+
+s2 = c()
+for(u in c((Delta + 1):(omega))){
+  for(v in c((Delta + 1):min(u, Delta + m))){
+    
+    a1 = sum( (new.dat$Yi == v) & (new.dat$Xi == u) )
+    a2 = log( f_X(u, U_est.n.star) )
+    a3 = sum( (old.dat$Yi == v) & (old.dat$Xi == u) )
+    a4 = log( f_X(u, U_est.n.star) / f_X(u, U_est.n) )
+    a5 = ifelse(a3 == 0, 0, a3 * a4)
+    s2 = append(s2, a1 * a2 + a5)
+  }
+}
+
+s3 = c()
+for(u in c((Delta + 1):(omega))){
+  for(v in c((Delta + 1):min(u, Delta + m))){
+    
+    a1 = sum( (new.dat$Yi == v) & (new.dat$Xi == u) )
+    a2 = log( g_Y(v, G_est.n.star) )
+    a3 = sum( (old.dat$Yi == v) & (old.dat$Xi == u) )
+    a4 = log( g_Y(v, G_est.n.star) / g_Y(v, G_est.n) )
+    a5 = ifelse(a3 == 0, 0, a3 * a4)
+    s3 = append(s3, a1 * a2 + a5)
+  }
+}
+
+#check
+l.0.n + s1 + sum(s2) + sum(s3)
+l.0.n.star
+
+K1 = n * log( n / (n + n.0) ) + n.0 * log(1 / (n.0 + n))
+K2 = s1 + sum(s2) + sum(s3)
+
+deg.free = (omega - Delta - 1/2) * m - (m^2) / 2 - omega + Delta + 1
+
+lambda.n = -2 * (l.0.n - l.1.n) - 2 * (K2 - K1)
+
+#store results
+results[1, "42w+"] = "Y"
+results[1, "n"] = n
+results[1, "Delta"] = Delta
+results[1, "Xi"] = omega
+results[1, "m"] = m
+results[1, "censor.rate"] = 0
+results[1, "An.0"] = n.0
+results[1, "uLRT"] = -2 * (l.0.n - l.1.n)
+results[1, "Lambda.n"] = lambda.n
+results[1, "deg.free"] = deg.free
+results[1, "crit.value"] = qchisq(0.05, deg.free, lower.tail = FALSE)
+results[1, "result"] = 1 * (lambda.n > qchisq(0.05, deg.free, lower.tail = FALSE))
+
+################################################################################
+#41 weeks gestation or less (full-term)
+################################################################################
+
+obs_data = fet.dat[,c("Xi", "Yi")]
+obs_data = obs_data[(obs_data$Xi <= 41), ] #full term
+
+Delta = min(obs_data$Yi) - 1
+omega = max(obs_data$Xi)
+m = max(obs_data$Yi) - Delta
+
+minU = Delta + 1
+maxU = omega
+minV = Delta + 1
+maxV = Delta + m
+
+U.support = c(minU:maxU)
+V.support = c(minV:maxV)
+
+u = c( (Delta + 1) : omega)
+reps = length(c( (Delta + 1) : (Delta + m)))
+
+x_col = c()
+y_col = c()
+for(u in c( (Delta + 1) : omega)){
+  
+  for(v in c( (Delta + 1) : (Delta + m))){
+    if(v <= u){
+      x_col = append(x_col, u)
+      y_col = append(y_col, v)
+    }
+  }
+  
+}
+
+h_inv = data.frame("X" = x_col,
+                   "Y" = y_col)
+
+source('./code/lrt-formulas-LT-only.R')
+
+#null: h_* is true
+haz_est = sapply(c( (Delta + 1) : omega), lnx)
+if ( is.na(haz_est[length(U.support)]) ){ haz_est[length(U.support)] = 1 }
+rev_haz_est = sapply( c((Delta + 1):(Delta +m)), bnx)
+U_est.n = sapply(c( (Delta + 1) : omega), f_est)
+G_est.n = sapply(c((Delta + 1):(Delta + m)), g_est)
+l.0.n = log_like_fn_0(U_est.n, G_est.n)
+
+#f.est.n = U_est.n
+#g.est.n = G_est.n
+alpha.est.n = alpha(U_est.n, G_est.n)
+
+OMEGA_est = c()
+for(j in c((Delta + 1):(omega))){
+  for(k in c((Delta + 1):min(j, Delta + m))){
+    #print(c(j,k))
+    OMEGA_est = append(OMEGA_est,
+                       sum(( (obs_data$Yi == k ) & (obs_data$Xi == j) )) / nrow(obs_data))
+  }
+}
+l.1.n = log_like_fn(OMEGA_est)
+
+n = nrow(obs_data)
+n.0 = sum(OMEGA_est == 0)
+
+#create missing sample
+missing.dat = as.data.frame(h_inv[which(OMEGA_est == 0),c(1:2)])
+names(missing.dat) = c("Xi", "Yi")
+obs_data = rbind(obs_data, missing.dat)
+
+#check l.1
+OMEGA_est = c()
+for(j in c((Delta + 1):(omega))){
+  for(k in c((Delta + 1):min(j, Delta + m))){
+    #print(c(j,k))
+    OMEGA_est = append(OMEGA_est,
+                       sum(( (obs_data$Yi == k ) & (obs_data$Xi == j) )) / nrow(obs_data))
+  }
+}
+l.1.n.star = log_like_fn(OMEGA_est)
+
+l.1.n + n * log( n / (n + n.0) ) + n.0 * log(1 / (n.0 + n))
+l.1.n.star
+
+#check l.0
+haz_est = sapply(c( (Delta + 1) : omega), lnx)
+if ( is.na(haz_est[length(U.support)]) ){ haz_est[length(U.support)] = 1 }
+rev_haz_est = sapply( c((Delta + 1):(Delta +m)), bnx)
+U_est.n.star = sapply(c( (Delta + 1) : omega), f_est)
+G_est.n.star = sapply(c((Delta + 1):(Delta + m)), g_est)
+l.0.n.star = log_like_fn_0(U_est.n.star, G_est.n.star)
+
+#f.est.n.star = U_est
+#g.est.n.star = G_est
+alpha.est.n.star = alpha(U_est.n.star, G_est.n.star)
+
+#calculate K2
+s1 = -(n + n.0) * log( alpha.est.n.star / alpha.est.n ) -
+  (n.0) * log( alpha.est.n )
+
+new.dat = obs_data[c( (n+1) : (n + n.0) ),]
+old.dat = obs_data[c(1:n),]
+
+s2 = c()
+for(u in c((Delta + 1):(omega))){
+  for(v in c((Delta + 1):min(u, Delta + m))){
+    
+    a1 = sum( (new.dat$Yi == v) & (new.dat$Xi == u) )
+    a2 = log( f_X(u, U_est.n.star) )
+    a3 = sum( (old.dat$Yi == v) & (old.dat$Xi == u) )
+    a4 = log( f_X(u, U_est.n.star) / f_X(u, U_est.n) )
+    a5 = ifelse(a3 == 0, 0, a3 * a4)
+    s2 = append(s2, a1 * a2 + a5)
+  }
+}
+
+s3 = c()
+for(u in c((Delta + 1):(omega))){
+  for(v in c((Delta + 1):min(u, Delta + m))){
+    
+    a1 = sum( (new.dat$Yi == v) & (new.dat$Xi == u) )
+    a2 = log( g_Y(v, G_est.n.star) )
+    a3 = sum( (old.dat$Yi == v) & (old.dat$Xi == u) )
+    a4 = log( g_Y(v, G_est.n.star) / g_Y(v, G_est.n) )
+    a5 = ifelse(a3 == 0, 0, a3 * a4)
+    s3 = append(s3, a1 * a2 + a5)
+  }
+}
+
+#check
+l.0.n + s1 + sum(s2) + sum(s3)
+l.0.n.star
+
+K1 = n * log( n / (n + n.0) ) + n.0 * log(1 / (n.0 + n))
+K2 = s1 + sum(s2) + sum(s3)
+
+deg.free = (omega - Delta - 1/2) * m - (m^2) / 2 - omega + Delta + 1
+
+lambda.n = -2 * (l.0.n - l.1.n) - 2 * (K2 - K1)
+
+#store results
+results[2, "42w+"] = "N"
+results[2, "n"] = n
+results[2, "Delta"] = Delta
+results[2, "Xi"] = omega
+results[2, "m"] = m
+results[2, "censor.rate"] = 0
+results[2, "An.0"] = n.0
+results[2, "uLRT"] = -2 * (l.0.n - l.1.n)
+results[2, "Lambda.n"] = lambda.n
+results[2, "deg.free"] = deg.free
+results[2, "crit.value"] = qchisq(0.05, deg.free, lower.tail = FALSE)
+results[2, "result"] = 1 * (lambda.n > qchisq(0.05, deg.free, lower.tail = FALSE))
+
+write.csv(results, "./results/table-1-fetal.csv")
+
+
+################################################################################
+#Consumer auto lease
+################################################################################
+
+rm(list=ls())
 
 #terms for testing:
 lease.terms = c(24, 27, 30, 36, 39, 42, 48)
@@ -74,12 +416,12 @@ rownames(results) = lease.terms
 
 l = lease.terms[1]
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1,4)]
 colnames(obs_data) = c("Xi", "Yi")
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -236,12 +578,12 @@ results[as.character(l), "result"] = 1 * (lambda.n > qchisq(0.05, deg.free, lowe
 ################################################################################
 l = lease.terms[2]
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1,4)]
 colnames(obs_data) = c("Xi", "Yi")
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -399,12 +741,12 @@ results[as.character(l), "result"] = 1 * (lambda.n > qchisq(0.05, deg.free, lowe
 
 l = lease.terms[3]
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1,4)]
 colnames(obs_data) = c("Xi", "Yi")
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -564,12 +906,12 @@ results[as.character(l), "result"] = 1 * (lambda.n > qchisq(0.05, deg.free, lowe
 
 l = lease.terms[4]
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1)]
 colnames(obs_data) = c("Zi", "Yi", "Di")
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -812,12 +1154,12 @@ results[as.character(l), "result"] = 1 * (lambda.tau.n > qchisq(0.05, deg.free, 
 ################################################################################
 l = lease.terms[5]
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1)]
 colnames(obs_data) = c("Zi", "Yi", "Di")
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -1063,12 +1405,12 @@ results[as.character(l), "result"] = 1 * (lambda.tau.n > qchisq(0.05, deg.free, 
 ################################################################################
 l = lease.terms[6]
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1)]
 colnames(obs_data) = c("Zi", "Yi", "Di")
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -1314,12 +1656,12 @@ results[as.character(l), "result"] = 1 * (lambda.tau.n > qchisq(0.05, deg.free, 
 ################################################################################
 l = lease.terms[7]
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo.csv', sep="")
 obs_data = read.csv(f.name)
 obs_data = obs_data[,-c(1)]
 colnames(obs_data) = c("Zi", "Yi", "Di")
 
-f.name = paste('./data-processed/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
+f.name = paste('./processed-data/mbalt-2017-', l, 'mo-trapezoid-dim.csv', sep="")
 trap.param = read.csv(f.name)
 trap.param = trap.param[,-1]
 
@@ -1562,4 +1904,4 @@ results[as.character(l), "deg.free"] = deg.free
 results[as.character(l), "crit.value"] = qchisq(0.05, deg.free, lower.tail = FALSE)
 results[as.character(l), "result"] = 1 * (lambda.tau.n > qchisq(0.05, deg.free, lower.tail = FALSE))
 
-write.csv(results, "./results/table-1.csv")
+write.csv(results, "./results/table-1-abs.csv")
