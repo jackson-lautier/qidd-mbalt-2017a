@@ -40,8 +40,8 @@ stored in a new folder, **results**.
 | `lrt-formulas-LT-only.R` | Functions used for QIDD testing in `data-analysis.R`, left-truncation (LT) only |
 | `lrt-formulas-LT-RC.R` | Functions used for QIDD testing in `data-analysis.R`, LT + right-censoring|
 | `mbalt-term-time-function.R` | Function used to process the MBALT 2017A raw lease data into survival times |
-| `2024-date-ref.csv` | Date file to estimate date of death for `data-processing.R' |
-| `fet-death-cols.csv` | Columns references to clean fetal data data with `data-processing.R' |
+| `2024-date-ref.csv` | Date file to estimate date of death for `data-processing.R` |
+| `fet-death-cols.csv` | Columns references to clean fetal data data with `data-processing.R` |
  
 
 
